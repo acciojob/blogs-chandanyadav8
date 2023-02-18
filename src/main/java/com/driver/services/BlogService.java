@@ -20,35 +20,19 @@ public class BlogService {
 
     @Autowired
     UserRepository userRepository1;
-    @Autowired
-    ImageRepository imageRepository;
 
     public Blog createAndReturnBlog(Integer userId, String title, String content) {
         //create a blog at the current time
-        User user=userRepository1.findById(userId).get();
-        Blog blog=new Blog(title,content);
-        blog.setUser(user);
-        List<Blog> listOfBlog=user.getBlogList();
-        listOfBlog.add(blog);
-        userRepository1.save(user);
-return blog;
+        User user = userRepository1.findById(userId).get();
+        Blog blog = new Blog(user,title,content);
+        blog.setPubDate(new Date());
+        userRepository1.save(user); //Blog saved in repo by cascading
+        user.getBlogList().add(blog);
+        return blog;
     }
 
     public void deleteBlog(int blogId){
         //delete blog and corresponding images
-        Blog blog=blogRepository1.findById(blogId).get();
-
-        User user=blog.getUser();
-        List<Blog> listOfBlog=user.getBlogList();
-        listOfBlog.remove(blog);
-        userRepository1.save(user);
-        List<Image> imageList=blog.getImageList();
-        for(Image image:imageList){
-            int id=image.getId();
-            imageRepository.deleteById(id);
-        }
-
         blogRepository1.deleteById(blogId);
-
     }
 }
